@@ -1,4 +1,4 @@
-package com.thecookiezen.microservices;
+package com.thecookiezen.microservices.infrastructure;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;

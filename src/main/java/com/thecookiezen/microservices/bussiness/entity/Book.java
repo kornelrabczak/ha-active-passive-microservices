@@ -1,4 +1,4 @@
-package com.thecookiezen.microservices;
+package com.thecookiezen.microservices.bussiness.entity;
 
 import java.io.Serializable;
 

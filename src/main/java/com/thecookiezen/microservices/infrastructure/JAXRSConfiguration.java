@@ -1,4 +1,6 @@
-package com.thecookiezen.microservices;
+package com.thecookiezen.microservices.infrastructure;
+
+import com.thecookiezen.microservices.bussiness.boundary.TestResource;
 
 import javax.ws.rs.core.Application;
 import java.util.Set;
