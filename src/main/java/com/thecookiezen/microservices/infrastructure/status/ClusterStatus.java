@@ -5,6 +5,7 @@ import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.leader.LeaderLatch;
 import org.apache.curator.framework.recipes.leader.LeaderLatchListener;
 import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.curator.x.discovery.ServiceDiscovery;
 import org.apache.curator.x.discovery.ServiceDiscoveryBuilder;
 import org.apache.curator.x.discovery.ServiceInstance;
 import org.apache.curator.x.discovery.UriSpec;
@@ -13,6 +14,9 @@ import org.apache.log4j.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Initialized;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
@@ -34,35 +38,44 @@ public class ClusterStatus implements LeaderLatchListener {
     @SystemProperty("nodeId")
     private String nodeId;
 
+    @Inject
+    @SystemProperty("port")
+    private String port;
+
     private CuratorFramework client;
     private LeaderLatch leaderLatch;
+    private ServiceDiscovery<InstanceDetails> discovery;
 
     private final JsonInstanceSerializer<InstanceDetails> serializer = new JsonInstanceSerializer<>(InstanceDetails.class);
 
+    private final InstanceDetails payload = new InstanceDetails(false);
+    private ServiceInstance<InstanceDetails> serviceInstance;
+
     @PostConstruct
-    public void init() {
+    public void init(@Observes @Initialized(ApplicationScoped.class) Object ignore) {
         client = CuratorFrameworkFactory.newClient(zookeeperConnection, new ExponentialBackoffRetry(1000, 3));
         client.start();
 
-        ServiceInstance<InstanceDetails> serviceInstance;
         try {
             client.blockUntilConnected();
 
             serviceInstance = ServiceInstance.<InstanceDetails>builder()
                     .uriSpec(new UriSpec("{scheme}://{address}:{port}"))
                     .address("localhost")
-                    .port(8080)
-                    .name(nodeId)
-                    .payload(new InstanceDetails(false))
+                    .port(Integer.parseInt(port))
+                    .name("bookService")
+                    .payload(payload)
                     .build();
 
-            ServiceDiscoveryBuilder.builder(InstanceDetails.class)
+            discovery = ServiceDiscoveryBuilder.builder(InstanceDetails.class)
                     .basePath("load-balancing-example")
                     .client(client)
                     .thisInstance(serviceInstance)
+                    .watchInstances(true)
                     .serializer(serializer)
-                    .build()
-                    .start();
+                    .build();
+
+            discovery.start();
 
             leaderLatch = new LeaderLatch(client, latchPath, nodeId);
             leaderLatch.addListener(this);
@@ -79,11 +92,23 @@ public class ClusterStatus implements LeaderLatchListener {
     @Override
     public void isLeader() {
         log.info("Node : " + nodeId + " is a leader");
+        payload.setLeader(true);
+        try {
+            discovery.updateService(serviceInstance);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void notLeader() {
         log.info("Node : " + nodeId + " is not a leader");
+        payload.setLeader(false);
+        try {
+            discovery.updateService(serviceInstance);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public String currentLeaderId() throws Exception {
@@ -94,6 +119,7 @@ public class ClusterStatus implements LeaderLatchListener {
     public void close() {
         try {
             leaderLatch.close();
+            discovery.close();
         } catch (IOException e) {
             log.error("Error when closing leaderLatch.", e);
         }

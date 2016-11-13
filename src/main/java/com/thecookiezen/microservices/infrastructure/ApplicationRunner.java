@@ -9,7 +9,7 @@ import org.jboss.resteasy.spi.ResteasyDeployment;
 public class ApplicationRunner {
 
     public static void main(String[] args) throws Exception {
-        int port = Integer.parseInt(args[0]);
+        int port = Integer.parseInt(System.getProperty("port"));
 
         Undertow.Builder serverBuilder = Undertow.builder().addHttpListener(port, "0.0.0.0");
         UndertowJaxrsServer undertowJaxrsServer = new UndertowJaxrsServer();
