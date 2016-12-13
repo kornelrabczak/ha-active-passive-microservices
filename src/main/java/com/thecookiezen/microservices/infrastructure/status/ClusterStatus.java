@@ -68,7 +68,7 @@ public class ClusterStatus implements LeaderLatchListener {
                     .build();
 
             discovery = ServiceDiscoveryBuilder.builder(InstanceDetails.class)
-                    .basePath("load-balancing-example")
+                    .basePath("service-discovery")
                     .client(client)
                     .thisInstance(serviceInstance)
                     .watchInstances(true)
@@ -96,7 +96,7 @@ public class ClusterStatus implements LeaderLatchListener {
         try {
             discovery.updateService(serviceInstance);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error when updating service discovery", e);
         }
     }
 
@@ -107,12 +107,8 @@ public class ClusterStatus implements LeaderLatchListener {
         try {
             discovery.updateService(serviceInstance);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error when updating service discovery", e);
         }
-    }
-
-    public String currentLeaderId() throws Exception {
-        return leaderLatch.getLeader().getId();
     }
 
     @PreDestroy

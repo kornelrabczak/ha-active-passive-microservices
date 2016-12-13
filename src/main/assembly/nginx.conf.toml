@@ -1,0 +1,8 @@
+[template]
+src = "services.conf.tmpl"
+dest = "/etc/nginx/nginx.conf"
+keys = [
+  "/service-discovery/bookService/"
+]
+check_cmd = "/usr/sbin/nginx -t -c {{.src}}"
+reload_cmd = "systemctl reload nginx"

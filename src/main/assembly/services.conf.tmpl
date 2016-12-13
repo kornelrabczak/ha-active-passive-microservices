@@ -1,0 +1,44 @@
+events {
+	worker_connections 768;
+	# multi_accept on;
+}
+
+http {
+
+	upstream read_nodes {
+	{{range gets "/service-discovery/bookService/*"}}
+	{{$data := json .Value}}
+	 	 	server {{$data.address}}:{{$data.port}};
+	{{end}}
+	}
+
+	upstream write_nodes {
+	{{range gets "/service-discovery/bookService/*"}}
+	{{$data := json .Value}}
+		{{$payload := $data.payload}}
+		{{if $payload.leader}}
+	 	 	server {{$data.address}}:{{$data.port}};
+	 	{{end}}
+	{{end}}
+	}
+
+	server {
+	
+		listen 80;
+	    
+	   	server_name  thecookiezen.com;
+
+	   	location / {
+		    proxy_pass        http://read_nodes/;
+	        proxy_redirect    off;
+	        proxy_set_header  Host             $host;
+	        proxy_set_header  X-Real-IP        $remote_addr;
+	        proxy_set_header  X-Forwarded-For  $proxy_add_x_forwarded_for;
+
+	    	limit_except GET {
+	      		proxy_pass http://write_nodes;
+	    	}
+	  }
+	}
+
+}
