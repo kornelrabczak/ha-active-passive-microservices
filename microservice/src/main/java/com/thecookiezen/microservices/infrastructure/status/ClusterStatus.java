@@ -14,9 +14,6 @@ import org.apache.log4j.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Initialized;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
@@ -52,7 +49,7 @@ public class ClusterStatus implements LeaderLatchListener {
     private ServiceInstance<InstanceDetails> serviceInstance;
 
     @PostConstruct
-    public void init(@Observes @Initialized(ApplicationScoped.class) Object ignore) {
+    public void init() {
         client = CuratorFrameworkFactory.newClient(zookeeperConnection, new ExponentialBackoffRetry(1000, 3));
         client.start();
 
