@@ -62,6 +62,12 @@
             <artifactId>akka-stream-kafka_2.11</artifactId>
             <version>0.13</version>
         </dependency>
+
+        <dependency>
+            <groupId>pl.setblack</groupId>
+            <artifactId>airomem-core</artifactId>
+            <version>1.1.0</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -14,12 +14,14 @@ import org.apache.log4j.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.ejb.Singleton;
+import javax.ejb.Startup;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.IOException;
 
 @Singleton
-public class ClusterStatus implements LeaderLatchListener {
+@Startup
+public class ClusterStatus implements ClusterSingleton, LeaderLatchListener {
 
     private static final Logger log = Logger.getLogger(ClusterStatus.class);
 

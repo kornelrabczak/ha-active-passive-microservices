@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import java.io.IOException;
 
 @Path("/zxc")
 @ApplicationScoped
@@ -21,8 +22,8 @@ public class KafkaResource {
     }
 
     @POST
-    public void putToKafka(String dupa) {
-        lambdaReplicator.replicate(dupa);
+    public void putToKafka(String msg) throws IOException {
+        lambdaReplicator.replicate(msg);
     }
 
 }

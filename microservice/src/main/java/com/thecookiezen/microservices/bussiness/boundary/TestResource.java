@@ -1,9 +1,8 @@
 package com.thecookiezen.microservices.bussiness.boundary;
 
-import com.thecookiezen.microservices.infrastructure.status.ClusterStatus;
+import com.thecookiezen.microservices.infrastructure.status.ClusterSingleton;
 import com.thecookiezen.microservices.infrastructure.status.SystemProperty;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -16,11 +15,10 @@ import javax.ws.rs.core.MediaType;
 @Path("/test")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@ApplicationScoped
 public class TestResource {
 
     @Inject
-    private ClusterStatus clusterStatus;
+    private ClusterSingleton clusterStatus;
 
     @Inject
     @SystemProperty("nodeId")

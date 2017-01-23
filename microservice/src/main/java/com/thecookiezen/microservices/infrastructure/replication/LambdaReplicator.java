@@ -20,13 +20,16 @@ import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.log4j.Logger;
+import pl.setblack.airomem.core.kryo.KryoSerializer;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.Singleton;
+import javax.ejb.Startup;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.concurrent.CompletableFuture;
 
 @Singleton
+@Startup
 public class LambdaReplicator {
 
     private static final Logger log = Logger.getLogger(LambdaReplicator.class);
@@ -34,6 +37,8 @@ public class LambdaReplicator {
     private ActorSystem system = ActorSystem.create("reactive-kafka");
 
     private ActorRef publisher;
+
+    private KryoSerializer serializer = new KryoSerializer();
 
     @Inject
     @SystemProperty("kafkaTopic")
